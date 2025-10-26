@@ -1,0 +1,9 @@
+{
+  "name": "Hardle Suite",
+  "short_name": "Hardle",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#121213",
+  "theme_color": "#121213",
+  "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+}

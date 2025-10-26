@@ -1,0 +1,21 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Hardle Suite</title>
+<link rel="stylesheet" href="./styles/core.css">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./assets/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+</head><body>
+<header><h1>Hardle Suite</h1><nav id="gameMenu"></nav></header>
+<main id="app"></main><div id="toaster" aria-live="polite" class="toast"></div>
+<script type="module">
+  import { boot } from './core/engine.js';
+  import * as hardle from './games/hardle.js';
+  boot({ games:[hardle], defaultGameId:'hardle' });
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./core/sw.js').catch(()=>{}));
+  }
+</script>
+</body></html>
