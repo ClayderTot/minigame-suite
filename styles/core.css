@@ -1,0 +1,11 @@
+body{background:#121213;color:#e6e6e6;font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:0}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #333}
+#gameMenu button{margin-right:8px}
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#333;padding:8px 12px;border-radius:8px;opacity:0;transition:opacity .2s}
+.toast.show{opacity:1}
+.kbd-row{display:flex;gap:6px;margin:6px 0}
+.key{background:#3a3a3c;border:none;border-radius:6px;padding:10px 12px;min-width:34px;color:#fff}
+.key.wide{min-width:64px}
+.key.gray{background:#4b4c4f}.key.yellow{background:#c9b458;color:#000}.key.green{background:#6aaa64;color:#000}
+.clear-cell{width:36px}
+.clear-btn{background:#1a1a1b;border:1px solid #333;color:#cbd1d6;border-radius:8px;width:32px;height:32px}
