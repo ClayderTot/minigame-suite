@@ -40,6 +40,53 @@ export function destroy(){
   }
 }
 
+// --- Add these constants with your file path + version ---
+const WORDS_URL = './assets/english_5_letter_expanded.txt';
+const WORDS_VERSION = '2025-11-01'; // bump when you change the file
+const LS_KEY = 'hs:words:data';
+const LS_VER = 'hs:words:version';
+
+
+async function loadWordList() {
+  try {
+    // 1) Use cached list if version matches
+    const v = localStorage.getItem(LS_VER);
+    const raw = localStorage.getItem(LS_KEY);
+    if (v === WORDS_VERSION && raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr.length > 100) {
+        allowed = new Set(arr);
+        return;
+      }
+    }
+    // 2) Fetch from assets (served & cached by SW)
+    const res = await fetch(WORDS_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const txt = await res.text();
+    const words = txt.split(/\r?\n/)
+      .map(w => w.trim().toLowerCase())
+      .filter(w => /^[a-z]{5}$/.test(w));
+    const uniq = Array.from(new Set(words));
+    if (uniq.length > 100) {
+      allowed = new Set(uniq);
+      localStorage.setItem(LS_KEY, JSON.stringify(uniq));
+      localStorage.setItem(LS_VER, WORDS_VERSION);
+      return;
+    }
+    // Fallback to defaults if list somehow tiny
+    allowed = new Set(DEFAULT_LIST.map(w=>w.toLowerCase()));
+  } catch (e) {
+    // Network/offline? Use previous cache or fallback
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      allowed = new Set(arr);
+    } else {
+      allowed = new Set(DEFAULT_LIST.map(w=>w.toLowerCase()));
+    }
+  }
+}
+
 /* ---------- UI ---------- */
 function renderControls(){
   const bar = document.createElement('div');
@@ -130,6 +177,23 @@ function status(text){
   const el = host.querySelector('#h-status'); if(el) el.textContent = text;
 }
 function toast(msg){ ctx.toast?.(msg, 1200); }
+
+export function render(context){
+  host = context.host;
+  host.innerHTML = '';
+  renderControls();
+  renderBoard();
+  renderLegend();
+  setupKeyboard();
+
+  // Show loading status, then start
+  status('Loading words…');
+  loadWordList().then(()=>{
+    status(`Words: ${allowed.size} • Ready`);
+    newGame();
+  });
+  wireKeydown();
+}
 
 /* ---------- Game control ---------- */
 function newGame(){
