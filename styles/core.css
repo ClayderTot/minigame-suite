@@ -1,11 +1,33 @@
-body{background:#121213;color:#e6e6e6;font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:0}
-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid #333}
-#gameMenu button{margin-right:8px}
-.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#333;padding:8px 12px;border-radius:8px;opacity:0;transition:opacity .2s}
-.toast.show{opacity:1}
-.kbd-row{display:flex;gap:6px;margin:6px 0}
-.key{background:#3a3a3c;border:none;border-radius:6px;padding:10px 12px;min-width:34px;color:#fff}
-.key.wide{min-width:64px}
+/* --- Hardle board & tiles --- */
+.game-controls{display:flex;gap:10px;align-items:center;margin:12px 0}
+.game-controls .btn{background:#222;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px;color:#fff;cursor:pointer}
+.game-controls .btn input{display:none}
+.game-controls .hint{margin-left:auto;color:#a8acb3;font-size:12px}
+
+.board{display:grid;grid-template-rows:repeat(8,62px);gap:8px;margin:8px 0}
+.row{display:grid;grid-template-columns:36px repeat(5,62px);gap:8px;justify-content:center;align-items:center;position:relative}
+.tile{border:2px solid #3a3a3c;background:#121213;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:28px;text-transform:uppercase;user-select:none;cursor:pointer;color:#e6e6e6}
+.tile.filled{border-color:#565758}
+.tile.gray{background:#3a3a3c;border-color:#3a3a3c;color:#fff}
+.tile.yellow{background:#c9b458;border-color:#c9b458;color:#000}
+.tile.green{background:#6aaa64;border-color:#6aaa64;color:#000}
+.counts{position:absolute;right:-118px;top:50%;transform:translateY(-50%);font-size:14px;color:#bbb;white-space:nowrap}
+.legend{display:flex;gap:10px;align-items:center;font-size:13px;color:#bbb;margin:6px 0 0}
+.legend .chip{width:14px;height:14px;border-radius:3px;display:inline-block}
+.chip.gray{background:#3a3a3c}.chip.yellow{background:#c9b458}.chip.green{background:#6aaa64}
+
+/* Clear button cell (uses RowClearButton from core/ui.js) */
+.clear-cell{width:36px;height:62px;display:flex;align-items:center;justify-content:center}
+.clear-btn{background:#1a1a1b;border:1px solid #2a2a2a;color:#cbd1d6;border-radius:8px;width:32px;height:32px;cursor:pointer}
+
+/* Keyboard colors (ensure gray is distinct) */
 .key.gray{background:#4b4c4f}.key.yellow{background:#c9b458;color:#000}.key.green{background:#6aaa64;color:#000}
-.clear-cell{width:36px}
-.clear-btn{background:#1a1a1b;border:1px solid #333;color:#cbd1d6;border-radius:8px;width:32px;height:32px}
+
+/* Win animation */
+@keyframes winPop{0%{transform:scale(1)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+.tile.win-anim{animation:winPop 260ms ease}
+@media (max-width:700px){
+  .board{grid-template-rows:repeat(8,52px)}
+  .row{grid-template-columns:36px repeat(5,52px)}
+  .counts{right:-100px;font-size:13px}
+}
