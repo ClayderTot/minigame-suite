@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hardle-suite-v2'; // <— bumped
+const CACHE_NAME = 'hardle-suite-v3'; // <— bumped
 const ASSETS = [
   './','./index.html','./manifest.json',
   './styles/core.css',
