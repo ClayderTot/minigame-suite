@@ -1,33 +1,181 @@
-/* --- Hardle board & tiles --- */
-.game-controls{display:flex;gap:10px;align-items:center;margin:12px 0}
-.game-controls .btn{background:#222;border:1px solid #2a2a2a;border-radius:8px;padding:8px 10px;color:#fff;cursor:pointer}
-.game-controls .btn input{display:none}
-.game-controls .hint{margin-left:auto;color:#a8acb3;font-size:12px}
+/* ================================
+   Hardle Suite – Core Styles
+   (drop-in for styles/core.css)
+   ================================ */
 
-.board{display:grid;grid-template-rows:repeat(8,62px);gap:8px;margin:8px 0}
-.row{display:grid;grid-template-columns:36px repeat(5,62px);gap:8px;justify-content:center;align-items:center;position:relative}
-.tile{border:2px solid #3a3a3c;background:#121213;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:28px;text-transform:uppercase;user-select:none;cursor:pointer;color:#e6e6e6}
-.tile.filled{border-color:#565758}
-.tile.gray{background:#3a3a3c;border-color:#3a3a3c;color:#fff}
-.tile.yellow{background:#c9b458;border-color:#c9b458;color:#000}
-.tile.green{background:#6aaa64;border-color:#6aaa64;color:#000}
-.counts{position:absolute;right:-118px;top:50%;transform:translateY(-50%);font-size:14px;color:#bbb;white-space:nowrap}
-.legend{display:flex;gap:10px;align-items:center;font-size:13px;color:#bbb;margin:6px 0 0}
-.legend .chip{width:14px;height:14px;border-radius:3px;display:inline-block}
-.chip.gray{background:#3a3a3c}.chip.yellow{background:#c9b458}.chip.green{background:#6aaa64}
+:root{
+  --bg:#121213;
+  --fg:#e6e6e6;
+  --muted:#a8acb3;
+  --border:#2a2a2a;
 
-/* Clear button cell (uses RowClearButton from core/ui.js) */
-.clear-cell{width:36px;height:62px;display:flex;align-items:center;justify-content:center}
-.clear-btn{background:#1a1a1b;border:1px solid #2a2a2a;color:#cbd1d6;border-radius:8px;width:32px;height:32px;cursor:pointer}
+  --tile-border:#3a3a3c;
+  --tile-muted:#565758;
 
-/* Keyboard colors (ensure gray is distinct) */
-.key.gray{background:#4b4c4f}.key.yellow{background:#c9b458;color:#000}.key.green{background:#6aaa64;color:#000}
+  --green:#6aaa64;
+  --yellow:#c9b458;
+  --tile-gray:#3a3a3c;   /* tiles */
+  --key-gray:#4b4c4f;    /* keyboard distinct gray */
+
+  --radius:10px;
+  --tile-size:62px;
+  --gap:8px;
+  --win-pop-ms:260ms;
+}
+
+/* Base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* Top bar */
+header{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 14px; border-bottom:1px solid var(--border);
+}
+header h1{
+  font-size:18px; margin:0; letter-spacing:.06em; text-transform:uppercase; font-weight:800;
+}
+#gameMenu button{
+  background:#1b1b1c; color:#fff; border:1px solid var(--border);
+  padding:8px 10px; border-radius:8px; cursor:pointer; margin-left:8px;
+}
+#gameMenu button:hover{ filter:brightness(1.08) }
+#gameMenu button:focus-visible{ outline:2px solid #9ad; outline-offset:2px }
+
+/* App container */
+#app{ max-width:860px; margin:0 auto; padding:14px; }
+
+/* Toast */
+.toast{
+  position:fixed; top:76px; left:50%; transform:translateX(-50%);
+  background:#333; color:#fff; padding:8px 12px; border-radius:8px;
+  opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0) }
+
+/* Controls bar inside games */
+.game-controls{
+  display:flex; gap:10px; align-items:center; margin:12px 0 10px;
+}
+.game-controls .btn,
+label.btn{
+  background:#222; color:#fff; border:1px solid var(--border);
+  padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:600;
+}
+label.btn input{ display:none }
+.game-controls .btn:hover, label.btn:hover{ filter:brightness(1.08) }
+.game-controls .btn:focus-visible, label.btn:focus-within{ outline:2px solid #9ad; outline-offset:2px }
+.game-controls .hint{ margin-left:auto; color:var(--muted); font-size:12px }
+
+/* Legend */
+.legend{
+  display:flex; gap:10px; align-items:center;
+  font-size:13px; color:#bbb; margin:6px 0 0;
+}
+.legend .chip{
+  width:14px; height:14px; border-radius:3px; display:inline-block; vertical-align:middle;
+}
+.chip.gray{ background:var(--tile-gray) }
+.chip.yellow{ background:var(--yellow) }
+.chip.green{ background:var(--green) }
+
+/* Board & rows */
+.board{
+  display:grid;
+  grid-template-rows: repeat(8, var(--tile-size));
+  gap:var(--gap);
+  margin:8px 0 12px;
+}
+.row{
+  display:grid;
+  grid-template-columns: 36px repeat(5, var(--tile-size));
+  gap:var(--gap);
+  justify-content:center; align-items:center; position:relative;
+}
+
+/* Clear button (left of each row) */
+.clear-cell{
+  width:36px; height:var(--tile-size);
+  display:flex; align-items:center; justify-content:center;
+}
+.clear-btn{
+  background:#1a1a1b; color:#cbd1d6; border:1px solid var(--tile-border);
+  width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:16px; line-height:1;
+}
+.clear-btn:hover{ filter:brightness(1.08) }
+.clear-btn:focus-visible{ outline:2px solid #9ad; outline-offset:2px }
+
+/* Tiles */
+.tile{
+  border:2px solid var(--tile-border);
+  background:#121213; color:var(--fg);
+  border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:28px; text-transform:uppercase;
+  user-select:none; cursor:pointer;
+  transition: border-color .12s ease, background-color .12s ease, color .12s ease, transform .05s ease;
+}
+.tile.filled{ border-color:var(--tile-muted) }
+.tile.gray   { background:var(--tile-gray); border-color:var(--tile-gray); color:#fff }
+.tile.yellow { background:var(--yellow);   border-color:var(--yellow);   color:#000 }
+.tile.green  { background:var(--green);    border-color:var(--green);    color:#000 }
+.tile:active{ transform:scale(.98) }
+
+/* Per-row counts */
+.counts{
+  position:absolute; right:-118px; top:50%; transform:translateY(-50%);
+  font-size:14px; color:#bbb; white-space:nowrap;
+}
+
+/* Keyboard */
+.kbd{ display:flex; flex-direction:column; gap:8px; margin-top:8px; user-select:none }
+.kbd-row{ display:flex; justify-content:center; gap:6px }
+.key{
+  background:#3a3a3c; color:#fff; border:none; border-radius:6px;
+  padding:12px 10px; min-width:34px; font-weight:800; cursor:pointer; font-size:14px;
+}
+.key.wide{ min-width:64px; font-size:12px; text-transform:uppercase }
+.key:hover{ filter:brightness(1.08) }
+.key:focus-visible{ outline:2px solid #9ad; outline-offset:2px }
+
+.key.gray{ background:var(--key-gray) }
+.key.yellow{ background:var(--yellow); color:#000 }
+.key.green{ background:var(--green);  color:#000 }
 
 /* Win animation */
-@keyframes winPop{0%{transform:scale(1)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
-.tile.win-anim{animation:winPop 260ms ease}
-@media (max-width:700px){
-  .board{grid-template-rows:repeat(8,52px)}
-  .row{grid-template-columns:36px repeat(5,52px)}
-  .counts{right:-100px;font-size:13px}
+@keyframes winPop {
+  0%{ transform:scale(1) }
+  60%{ transform:scale(1.08) }
+  100%{ transform:scale(1) }
+}
+.tile.win-anim{ animation:winPop var(--win-pop-ms) ease }
+
+/* Responsiveness */
+@media (max-width: 700px){
+  :root{ --tile-size:52px }
+  .counts{ right:-100px; font-size:13px }
+  header{ padding:10px 12px }
+  #app{ padding:12px }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce){
+  .toast, .tile{ transition:none }
+  .tile.win-anim{ animation:none }
+}
+
+/* Nice focus for clickable elements globally */
+button, .tile, .key, .clear-btn, .btn {
+  outline:none;
+}
+button:focus-visible, .tile:focus-visible, .key:focus-visible, .clear-btn:focus-visible, .btn:focus-visible {
+  outline:2px solid #9ad; outline-offset:2px;
 }
