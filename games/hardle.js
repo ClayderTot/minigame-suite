@@ -7,6 +7,11 @@ const ROWS = 8, COLS = 5;
 const EXCEPTIONS_NON_PLURAL_S = new Set(['glass','class','grass','press','chess']);
 const PRECEDENCE = { gray:1, yellow:2, green:3 };
 const WIN_DELAY_MS = 140;
+// --- Wordlist integration (Method A) ---
+const WORDS_URL = './assets/english_5_letter_expanded.txt';
+const WORDS_VERSION = '2025-11-01';       // ⬅️ bump when the file changes
+const LS_KEY = 'hs:words:data';
+const LS_VER = 'hs:words:version';
 
 // small fallback so it runs even before importing a big list
 const DEFAULT_LIST = ("about other which their there first could sound light those point right three small large group place great young water never under words world night state today thing heart house sweet train truth apple grape lemon berry crane flint charm pride siren trace storm vital rigid ghoul creak shard blaze spice fable crown knack gamer linen brave truly loose tight rhyme mirth quilt zesty oxide quirk phase sigma align alone angel arose axial beach beast began belch belly bench boast boost bravo brood brown budge cadre camel candy canon cargo carve cedar chain chair chant chard chase cheap check chest chewy civic clerk climb clock clone close cloth cloud coast cobra count crash craze cream crisp crown cycle dance debut decay decor delay delta depth diner dizzy dodge doubt draft drain drape dream dress drink drive eager early earth edict elder elite enact enemy entry equal error evoke exact faith false feast ferry field final finer flare float floor focal focus forge forth frame fresh frost giant giver glade globe gloom gnash grace grade grain grape graph grasp great green greet groan group habit haunt heart heavy hinge honey honor horse house humor image imply inlet inner jolly judge knead knack lemon linen loamy logic loose magic mirth moist month motif noble noise north nurse occur ocean orbit order oxide paint panic party pause pearl pedal penal perky piano piece pilot pinch pixel pivot place plaid plain plane plant plead pluck point poise porch pride prime print prism prize proof proud prove prune quota quote radar rainy ratio reach react regal reign relax remit renew reset resin rhyme ridge right rigid rinse rival river rough round royal ruler rumor rural sauce scale scare scarf scene scent scope score scout serve seven shade shake shame shape share shard shark sharp shear sheen sheep shine shirt shock shoot shore short shout shove shown siege siren skill slate sleep smell smile smoke snack sober solar solid sound spare speak spear spice spicy spike split spoil spoke spore sport spray sprig stare stark start state steel steep stern stick stiff still stint stone stony store storm story stout stove strap straw stray strew strip stuck study stuff suite sweet swift table tacit tango taper taste teach tempo thank theft their theme there these thick thief thing think third those three thigh tight timer trace track trade trail train trait tread treat trend trial tried trite truly trunk trust truth ultra until vapor vault venue verge verse vicar video vigor villa viral vital vivid vowel wagon waist watch water weave wedge wheel where which while whisk white whole widen width wield windy wiser witch woman women world words worry worth woven wrist wrong yacht yearn yeast yield young youth zesty zonal").split(/\s+/);
@@ -19,37 +24,9 @@ let curRow = 0, curCol = 0, gameOver = false;
 // one-and-only keydown handler (prevents double-typing)
 let keyListener = null;
 
-export function init(context){ ctx = context; }
-export function render(context){
-  ctx = context;
-  host = context.host;
-  host.innerHTML = '';
-
-  renderControls();
-  renderBoard();
-  renderLegend();
-  setupKeyboard();
-  newGame();
-  wireKeydown(); // attaches once
-}
-
-export function destroy(){
-  if (keyListener) {
-    document.removeEventListener('keydown', keyListener);
-    keyListener = null;
-  }
-}
-
-// --- Add these constants with your file path + version ---
-const WORDS_URL = './assets/english_5_letter_expanded.txt';
-const WORDS_VERSION = '2025-11-01'; // bump when you change the file
-const LS_KEY = 'hs:words:data';
-const LS_VER = 'hs:words:version';
-
-
 async function loadWordList() {
   try {
-    // 1) Use cached list if version matches
+    // Prefer localStorage if version matches
     const v = localStorage.getItem(LS_VER);
     const raw = localStorage.getItem(LS_KEY);
     if (v === WORDS_VERSION && raw) {
@@ -59,7 +36,8 @@ async function loadWordList() {
         return;
       }
     }
-    // 2) Fetch from assets (served & cached by SW)
+
+    // Fetch from assets (already cached by SW after first online load)
     const res = await fetch(WORDS_URL, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const txt = await res.text();
@@ -67,25 +45,53 @@ async function loadWordList() {
       .map(w => w.trim().toLowerCase())
       .filter(w => /^[a-z]{5}$/.test(w));
     const uniq = Array.from(new Set(words));
+
     if (uniq.length > 100) {
       allowed = new Set(uniq);
       localStorage.setItem(LS_KEY, JSON.stringify(uniq));
       localStorage.setItem(LS_VER, WORDS_VERSION);
       return;
     }
-    // Fallback to defaults if list somehow tiny
-    allowed = new Set(DEFAULT_LIST.map(w=>w.toLowerCase()));
+
+    // fallback if somehow tiny
+    allowed = new Set(DEFAULT_LIST.map(w => w.toLowerCase()));
   } catch (e) {
-    // Network/offline? Use previous cache or fallback
+    // Offline or fetch failed: try last cached list, else fallback
     const raw = localStorage.getItem(LS_KEY);
     if (raw) {
       const arr = JSON.parse(raw);
       allowed = new Set(arr);
     } else {
-      allowed = new Set(DEFAULT_LIST.map(w=>w.toLowerCase()));
+      allowed = new Set(DEFAULT_LIST.map(w => w.toLowerCase()));
     }
   }
 }
+
+export function render(context){
+  host = context.host;
+  host.innerHTML = '';
+  renderControls();
+  renderBoard();
+  renderLegend();
+  setupKeyboard();
+
+  status('Loading words…');
+  loadWordList().then(() => {
+    status(`Words: ${allowed.size} • Ready`);
+    newGame();
+  });
+
+  wireKeydown();
+}
+
+
+export function destroy(){
+  if (keyListener) {
+    document.removeEventListener('keydown', keyListener);
+    keyListener = null;
+  }
+}
+
 
 /* ---------- UI ---------- */
 function renderControls(){
@@ -178,22 +184,6 @@ function status(text){
 }
 function toast(msg){ ctx.toast?.(msg, 1200); }
 
-export function render(context){
-  host = context.host;
-  host.innerHTML = '';
-  renderControls();
-  renderBoard();
-  renderLegend();
-  setupKeyboard();
-
-  // Show loading status, then start
-  status('Loading words…');
-  loadWordList().then(()=>{
-    status(`Words: ${allowed.size} • Ready`);
-    newGame();
-  });
-  wireKeydown();
-}
 
 /* ---------- Game control ---------- */
 function newGame(){
