@@ -1,5 +1,5 @@
 // core/sw.js
-const CACHE_NAME = 'hardle-suite-v3'; // ⬅️ bump this
+const CACHE_NAME = 'hardle-suite-v6'; // ⬅️ bump this
 const ASSETS = [
   './','./index.html','./manifest.json',
   './styles/core.css',
