@@ -7,9 +7,8 @@ const ROWS = 8, COLS = 5;
 const EXCEPTIONS_NON_PLURAL_S = new Set(['glass','class','grass','press','chess']);
 const PRECEDENCE = { gray:1, yellow:2, green:3 };
 const WIN_DELAY_MS = 140;
-// --- Wordlist integration (Method A) ---
 const WORDS_URL = './assets/english_5_letter_expanded.txt';
-const WORDS_VERSION = '2025-11-01';       // ⬅️ bump when the file changes
+const WORDS_VERSION = '2025-11-01';       
 const LS_KEY = 'hs:words:data';
 const LS_VER = 'hs:words:version';
 
@@ -84,14 +83,12 @@ export function render(context){
   wireKeydown();
 }
 
-
 export function destroy(){
   if (keyListener) {
     document.removeEventListener('keydown', keyListener);
     keyListener = null;
   }
 }
-
 
 /* ---------- UI ---------- */
 function renderControls(){
@@ -210,7 +207,7 @@ function onVirtualKey(key){
 }
 
 function wireKeydown(){
-  if (keyListener) return; // already attached
+  if (keyListener) return; // already wired
   keyListener = (e)=>{
     if(gameOver || !host?.isConnected) return;
     const k = (e.key || '').toLowerCase();

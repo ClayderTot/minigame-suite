@@ -1,12 +1,12 @@
 // core/sw.js
-const CACHE_NAME = 'hardle-suite-v6'; // ⬅️ bump this
+const CACHE_NAME = 'hardle-suite-v6'; 
 const ASSETS = [
   './','./index.html','./manifest.json',
   './styles/core.css',
   './core/engine.js','./core/ui.js','./core/sw.js',
   './games/hardle.js',
   './assets/icon-192.png',
-  './assets/english_5_letter_expanded.txt' // ⬅️ include your big list
+  './assets/english_5_letter_expanded.txt' // word list
 ];
 
 self.addEventListener('install', e =>
